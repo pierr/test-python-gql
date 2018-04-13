@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from graphql import graphql
 
 from graphql.type import (GraphQLArgument,
@@ -6,20 +8,25 @@ from graphql.type import (GraphQLArgument,
                           GraphQLInputObjectType,
                           GraphQLInputObjectField)
 
+from graphql.language.parser import parse as parse_gql
+from graphql.language.source import Source as Source_gql
+from graphql.validation import validate as validate_gql
+
 # GraphQLArgument, GraphQLEnumType, GraphQLEnumValue,
 # GraphQLInterfaceType, GraphQLList, GraphQLInputObjectField
 
 '''
     The query types
-'''# Define the meta part of the task
+'''
+# Define the meta part of the task
 metaType = GraphQLObjectType('Meta', description='The meta informations', fields=lambda: {
-    'status': GraphQLField(
+'status': GraphQLField(
             GraphQLString,
             description='The status of the metadata',
         )
 })
 # Define the data part of the task
-dataType =  GraphQLObjectType('Data', description='The meta informations', fields=lambda: {
+dataType = GraphQLObjectType('Data', description='The meta informations', fields=lambda: {
 'name': GraphQLField(
         GraphQLString,
         description='The name of the data',
@@ -44,12 +51,12 @@ queryType = GraphQLObjectType(
     fields=lambda: {
         'startTraining': GraphQLField(
             taskType,
+            # default arguments
             resolver=lambda root, info, **args: {'id': '1', 'meta': {'status': 'error'}, 'data': {'name': 'Pierre'}}
         )
 
     }
 )
-
 
 
 '''
@@ -84,11 +91,14 @@ taskInputType = GraphQLInputObjectType(
     }
 )
 
+
 def mutation_task_resolver(root, info, **args):
-    print 'mutation_task_resolver'
-    print args
-    print info
+    print('mutation_task_resolver')
+    print(args)
+    print(info)
     return {'id': '1', 'meta': {'status': 'error'}, 'data': {'name': 'Pierre'}}
+
+
 # Define the query type of graphql
 mutationTask = GraphQLObjectType(
     'Mutation',
@@ -111,15 +121,12 @@ Building the final schema
 TaskSchema = GraphQLSchema(query=queryType, mutation=mutationTask , types=[metaType, dataType, taskType])
 
 ### Test on some schema validation
-from graphql.language.parser import parse
-from graphql.language.source import Source
-from graphql.validation import validate
 def validation_errors(query):
-    source = Source(query, 'task.graphql')
+    source = Source_gql(query, 'task.graphql')
     print(source.body)
     print(source.name)
-    ast = parse(source)
-    return validate(TaskSchema, ast)
+    ast = parse_gql(source)
+    return validate_gql(TaskSchema, ast)
 q = '''
     query TestTask1 {
        startTraining {
@@ -132,7 +139,9 @@ print(validation_errors(q))
 
 #### from graphql import graphql
 def test_mutation(mutation_query, variables):
-    print variables
+    print("test_mutation :", variables)
+    # print(" ##### mutation_query  ####### ")
+    # print(mutation_query)
     res = graphql(TaskSchema, mutation_query, variable_values=variables)
     print (res.data)
     print (res.errors)
@@ -147,26 +156,17 @@ mutation TryStartTrain($task: TaskInput) {
         }
 
 '''
-mv = {'task': {'id': '1', 'meta': {'statas': 1}, 'data': {'name': 'Pierre'}}}
-test_mutation(mq, mv)
-
-print("\n\n")
-
-mv = {'task': {'id': '1', 'meta': {'status': 1}, 'data': {'name': 'Pierre'}}}
-test_mutation(mq, mv)
 
 
-var = {'id': '1', 'meta': {'status': 1}, 'data': {'name': 'Pierre'}}
+def validate_start_training(muta_vars):
+    test_mutation(mq, {'task': muta_vars})
 
 
-def validate_start_training(parameters):
-    test_mutation(mq, {'task': parameters})
-
-
-def validate(task_name, parameters):
+def validate(task_name, muta_vars):
     return {
         'engine:start': validate_start_training
-    }[task_name](parameters)
+    }[task_name](muta_vars)
 
 
-validate('engine:start', var)
+muta_vars = {'id': '1', 'meta': {'status': 1}, 'data': {'name': 'Pierre'}}
+validate('engine:start', muta_vars)
