@@ -32,6 +32,18 @@ dataType = GraphQLObjectType('Data', description='The meta informations', fields
         description='The name of the data',
     )
 })
+# Define args type, which contains
+# - metaType
+# - dataType
+argsType = GraphQLObjectType(
+    'Args',
+    description='The args container',
+    fields=lambda: {
+        'meta': GraphQLField(metaType),
+        'data': GraphQLField(dataType),
+        }
+    )
+
 # Define a query task type
 taskType = GraphQLObjectType(
     'Task',
@@ -41,8 +53,9 @@ taskType = GraphQLObjectType(
             GraphQLNonNull(GraphQLString),
             description='The id of the task.'
         ),
-        'meta': GraphQLField(metaType),
-        'data': GraphQLField(dataType)
+        'args': GraphQLField(argsType),
+        # 'meta': GraphQLField(metaType),
+        # 'data': GraphQLField(dataType)
     }
 )
 # Define the query type of graphql
