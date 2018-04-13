@@ -1,0 +1,1 @@
+{"task":"engine:train:get-trial-result","args":[{"status":"requested"},{"dataset":"5ac7a6faf644b20166caf597","modelchoice":"supervised","project":"5ac7a6edf644b20166caf596","train_id":"5ace094a761e68003c34fda1","transfo_id":"5ace094a761e68003c34fda0"}],"kwargs":{},"id":"ed0f9e10-7b43-42da-93b4-7b3e0f0fb70f"}
